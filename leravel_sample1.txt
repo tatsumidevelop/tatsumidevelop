@@ -1,0 +1,143 @@
+[laravel] controllerからviewへの変数の受け渡しとその展開方法
+https://qiita.com/ryo2132/items/63ced19601b3fa30e6de
+
+controllerからviewに引数を渡す
+return view('test.normal')->with([
+	"test_1" => $test_1,
+	"test_2" => $test_2,
+]);
+// 上記をcompactを使用して記述
+return view('test.normal',compact('test_1','test_2'));
+
+$test_array = ["テスト1","テスト2", "テスト3"];
+return view('test.normal',compact('test_array'));
+
+// view fromからデータを渡す
+<form action="form_post" method="post" accept-charset="utf-8">
+	<input type="text" name="textbox" value="">
+	<label><input type="radio" name="radio-btn" value="選択1"> 選択1</label>
+	<label><input type="radio" name="radio-btn" value="選択2"> 選択2</label>
+</form>
+
+public function form_post(Request $request) {
+	$post_data = $request::all();
+    return view('test.form_disp',compact('post_data'));
+}
+//表示側 view
+<p class="text-center">
+	テキストボックスは{{$post_data['textbox']}}
+	ラジオボタンは{{$post_data['radio-btn']}}
+</p>
+
+// データベース化allでデータを渡す　
+return view('test.db',compact('db_data'));
+//表示側 view
+@foreach($db_data as $recode)
+	<tr>
+		<th>{{$recode->id}}</th>
+		<th>{{$recode->name}}</th>
+		<th>{{$recode->old}}</th>
+	</tr>
+@endforeach
+// $count = $db_data->count();
+
+
+
+
+
+
+基礎的なLaravelスキルを確かめるサンプルプロジェクト
+https://qiita.com/vivid_colors/items/22171bb8ae5a4c581c97
+
+
+Model	アプリケーションのデータ、ビジネスルール、ロジック、関数を定義。
+View	Model内のデータを参照してグラフや図などの任意の情報表現する
+		（入出力や表示の処理）
+Controller	ユーザーの入力を受け取り、ModelとViewへの命令に変換して制御する
+
+1	ユーザがViewに入力する。
+2	Viewがコントローラに入力情報を渡す。
+3	Controllerが入力情報に応じてモデルのメソッドを呼びだす
+	（データの書き換えが発生することも）。
+4	Modelが呼び出されたメソッドを処理する。
+5	ControllerがViewに表示命令を出す。
+6	Viewは関連するデータをModelから参照する。
+	（Modelは参照されたデータをViewにわたす）
+7	Viewがユーザーにデータを表示する。
+
+マイグレーション 
+	データベースのテーブル作成や編集などを管理するために使用
+
+マイグレーションファイル
+	データベースのテーブル作成や編集などを管理するためのファイルで、
+	テーブルの設計書のようなもの。
+
+シーディング
+	DBにレコードをコマンドで登録する仕組み
+	「①シーダーファイルの作成」
+	「②シーディングの実行」の順で行う。
+
+ルーティング
+	クライアントからのリクエストを受け付け、
+	その内容によって処理を振り分けることです。
+	ルーティング情報はroutes/web.phpファイルに記述します。
+
+Controller
+	ルーティングされてきたリクエストを受け取り、レスポンスを作成する
+	（レスポンスがHTMLならViewに処理を依頼）
+	app/Http/Controllersディレクトリでコントローラを作成していく
+
+Blade
+	ビューを作成するためのテンプレートエンジン。
+	{{ $variables }}とすることで、
+	コントローラから受け取った値を画面に出力（変数展開）できます。
+	また@foreach($array as $elem)や@if($bool)と記述することで
+	制御構文を使用できます。その場合、
+	制御構文の終端は@endforeach、@endifと記述します。
+ビューの継承
+	共通で利用するテンプレートの作成を行う。
+	ビューの継承を利用すると効率的にViewを作成できます。
+	親ビューはlayout.blade.phpに共通となる要素のみ記述します。
+Eloquent ORM
+	Laravelでデータ操作をするための実装です。
+	モデルはテーブルにマッピングされており、
+	テーブルの登録や取得更新などの操作を持っています。
+
+
+model, migration, seeder, factory, authの定義や作成
+
+	モデルファイルとマイグレーションファイルの作成。
+	php artisan make:model Company -m
+	php artisan make:model Employee -m
+	で
+	database/migrationsの下にテーブル作成定義ファイルを作成
+	上記コマンドで生成
+	2022_05_12_063439_create_companies_table.php 
+	2022_05_12_063459_create_employees_table.php 
+
+	app/Modelsの下に
+	Company.php、Employee.phpを作成
+
+各テーブルのSeeder, Factoryファイルを作成してダミーデータ作成の準備をする
+	php artisan make:seeder UsersTableSeeder
+	php artisan make:seeder CompaniesTableSeeder
+	php artisan make:seeder EmployeesTableSeeder
+
+	database/seeders/DatabaseSeeder.phpで使用するSeederファイルを指定する
+	UsersTableSeeder.php,CompaniesTableSeeder.php,EmployeesTableSeeder.php
+	を作成
+
+Factoryファイルの作成(ダミーデータの定義をする)
+	php artisan make:factory CompanyFactory
+	php artisan make:factory EmployeeFactory
+
+	database/factoriesを指定する
+	CompanyFactory.php,EmployeeFactory.php
+	を作成し
+
+一通り定義が完了したので--seedオプションを指定して実行する。
+php artisan migrate:refresh --seed
+コマンド実行後にデータを確認する。
+
+全54種類！Laravel 5.7のバリデーション実例
+https://blog.capilano-fw.com/?p=341
